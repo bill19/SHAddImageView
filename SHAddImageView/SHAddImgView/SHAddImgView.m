@@ -29,12 +29,12 @@
 /**
  通过configmodel 获取 每个ITEM的高度 （高度 = 宽度）
  */
-@property (nonatomic, assign ,readonly) CGFloat itemHeight;
+@property (nonatomic, assign) CGFloat itemHeight;
 
 /**
  通过itemHeight 获取 每个ImageView的高度 （高度 = itemHeight - padding ）
  */
-@property (nonatomic, assign ,readonly) CGFloat imageHeight;
+@property (nonatomic, assign) CGFloat imageHeight;
 
 /**
  一行展示数量
