@@ -11,8 +11,7 @@
 #import <MobileCoreServices/UTCoreTypes.h>
 #import "TZImagePickerController.h"
 #import "SHAddCollectionCell.h"
-#import "SHAddImgModel.h"
-#import "SHAddHeader.h"
+
 @interface SHAddImgView()<UICollectionViewDelegate,UICollectionViewDataSource,SHAddCollectionCellDelegate,UIImagePickerControllerDelegate>
 /**
  承载图片的CollectionView
@@ -27,18 +26,33 @@
  */
 @property (nonatomic, strong) NSMutableArray <SHAddImgModel *>*imageModels;
 
-@property (nonatomic, assign) CGFloat imageItemHeight;
+/**
+ 通过configmodel 获取 每个ITEM的高度 （高度 = 宽度）
+ */
+@property (nonatomic, assign ,readonly) CGFloat itemHeight;
+
+/**
+ 通过itemHeight 获取 每个ImageView的高度 （高度 = itemHeight - padding ）
+ */
+@property (nonatomic, assign ,readonly) CGFloat imageHeight;
+
+/**
+ 一行展示数量
+ */
+@property (nonatomic, assign) NSInteger maximageColumn;
 @end
 
 @implementation SHAddImgView
 
-- (instancetype)initWithFrame:(CGRect)frame {
-    self = [super initWithFrame:frame];
+- (instancetype)initWithMaxColumn:(NSInteger)maxColumn {
+    self = [super init];
     if (self) {
+        _maximageColumn = maxColumn;
         [self setupPhotoView];
     }
     return self;
 }
+
 
 #pragma mark - 图片的view
 - (void)setupPhotoView {
@@ -131,6 +145,7 @@
     SHAddImgModel *model = self.imageModels[indexPath.item];
     cell.delegate = self;
     cell.imageModel = model;
+    cell.imageHeight = _imageHeight;
     cell.configModel = _configModel;
     return cell;
 }
@@ -149,14 +164,12 @@
     [self.imageModels insertObject:objc atIndex:destinationIndexPath.item];
 }
 
-
 - (UICollectionView *)collectionView{
     if (!_collectionView) {
         UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-        layout.itemSize = CGSizeMake(kSHScreenWidth / _configModel.imageColumn,kSHScreenWidth / _configModel.imageColumn);
-        _collectionView = [[UICollectionView alloc] initWithFrame:self.bounds collectionViewLayout:layout];
-        layout.minimumLineSpacing = 1.1f;
-        layout.minimumInteritemSpacing = 1.1f;
+        layout.minimumInteritemSpacing = 0.0;
+        layout.minimumLineSpacing = 0.0;
+        _collectionView = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
         [_collectionView registerClass:[SHAddCollectionCell class] forCellWithReuseIdentifier:@"SHAddCollectionCell"];
         _collectionView.backgroundColor = [UIColor clearColor];
         _collectionView.dataSource = self;
@@ -175,10 +188,11 @@
 
 #pragma mark - 进入图片浏览器
 - (void)imageViewTap:(SHAddImgModel *)imageModel {
-
+    if (!_configModel.shouldPhotoBrowser) {
+        return;
+    }
     NSInteger itemIndex = 0;
     NSMutableArray *images = [NSMutableArray array];
-
     for (NSInteger index = 0; index < self.imageModels.count; index++) {
         SHAddImgModel *model = self.imageModels[index];
         if ([imageModel isEqual:model]) {
@@ -186,7 +200,9 @@
         }
         [images addObject:model.image];
     }
-//    [[MessageReadManager defaultManager] showBrowserWithImages:images currentIndex:itemIndex forward:nil];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(didSelectItemSource:index:)]) {
+        [self.delegate didSelectItemSource:images index:itemIndex];
+    }
 }
 
 //相册选择器
@@ -214,13 +230,21 @@
 }
 
 - (void)resetAddImgFrame{
+    NSInteger imgRow  = _imageModels.count % _maximageColumn;
+    NSInteger imgLine = _imageModels.count / _maximageColumn;
+    CGFloat starIndexX = (_itemHeight + kItemPadding) * imgRow  + kItemPadding * 0.5;
+    CGFloat starIndexY = (_itemHeight + kItemPadding) * imgLine + kItemPadding * 0.5;
     if(_imageModels.count < _configModel.maxPhoto && _configModel.addBtnHidden == NO){
-        NSInteger imgRow  = _imageModels.count % _configModel.imageColumn;
-        NSInteger imgLine = _imageModels.count / _configModel.imageColumn;
-        _addImgView.frame = CGRectMake(imgRow * _imageItemHeight, _configModel.padding  + (_configModel.padding + _imageItemHeight) * imgLine, _imageItemHeight, _imageItemHeight);
+        _addImgView.frame = CGRectMake(starIndexX, starIndexY, _imageHeight, _imageHeight);
         _addImgView.hidden = NO;
+        if (self.delegate && [self.delegate respondsToSelector:@selector(addimageViewUpdateHeight:)]) {
+            [self.delegate addimageViewUpdateHeight:((imgLine + 1) * (_itemHeight + kItemPadding))];
+        }
     }else{
         _addImgView.hidden = YES;
+        if (self.delegate && [self.delegate respondsToSelector:@selector(addimageViewUpdateHeight:)]) {
+            [self.delegate addimageViewUpdateHeight:((imgLine + 1) * (_itemHeight + kItemPadding))];
+        }
     }
 }
 
@@ -240,18 +264,20 @@
 /**
  存草稿进入展示图片
 
- @param images images
+ @param defualtImages images
  */
-- (void)showNumPics:(NSArray *)images {
-    for (UIImage *image in images) {
-        SHAddImgModel *model = [[SHAddImgModel alloc] init];
-        model.image = image;
-        [self.imageModels addObject:model];
+- (void)setDefualtImages:(NSArray<UIImage *> *)defualtImages {
+    if (_configModel.isDefualt) {
+        _defualtImages = defualtImages;
+        for (UIImage *image in defualtImages) {
+            SHAddImgModel *model = [[SHAddImgModel alloc] init];
+            model.image = image;
+            [self.imageModels addObject:model];
+        }
+        [self resetAddImgFrame];
+        [self.collectionView reloadData];
     }
-    [self resetAddImgFrame];
-    [self.collectionView reloadData];
 }
-
 
 - (NSMutableArray <SHAddImgModel *>*)imageModels {
     if (!_imageModels) {
@@ -264,11 +290,13 @@
     _configModel = configModel;
     _addImgView.hidden = _configModel.addBtnHidden;
     _addImgView.image = [UIImage imageNamed:_configModel.placeholderName];
-    _imageItemHeight = (kSHScreenWidth - _configModel.padding) / _configModel.imageColumn;
-    _addImgView.frame = CGRectMake(_configModel.padding, _configModel.padding , _imageItemHeight, _imageItemHeight);
+    _itemHeight = self.bounds.size.width / _maximageColumn - kItemPadding;
+    _imageHeight = _itemHeight - kItemPadding;
+    _addImgView.frame = CGRectMake(kItemPadding * .5, kItemPadding * .5, _imageHeight, _imageHeight);
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-    layout.itemSize = CGSizeMake(kSHScreenWidth / _configModel.imageColumn,kSHScreenWidth / _configModel.imageColumn);
+    layout.itemSize = CGSizeMake(_itemHeight,_itemHeight);
     _collectionView.collectionViewLayout = layout;
+    _collectionView.frame = self.bounds;
 }
 
 #pragma mark - UIImagePickerControllerDelegate

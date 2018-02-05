@@ -11,5 +11,4 @@
 
 #import "SHAddImgView.h"
 #import "SHConfigModel.h"
-#define kSHScreenWidth [UIScreen mainScreen].bounds.size.width
 #endif /* SHAddHeader_h */

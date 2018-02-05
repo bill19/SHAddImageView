@@ -17,6 +17,10 @@
 @property (nonatomic, copy) NSString *placeholderName;
 
 /**
+  删除按钮默认图片 
+ */
+@property (nonatomic, copy) NSString *deletePlaceholdName;
+/**
  最大图片数目
  */
 @property (nonatomic, assign) NSInteger maxPhoto;
@@ -27,15 +31,14 @@
 @property (nonatomic, assign) BOOL addBtnHidden;
 
 /**
- 一行展示数量
+ 外部 是否可以进入图片浏览模式
  */
-@property (nonatomic, assign) NSInteger imageColumn;
+@property (nonatomic, assign) BOOL shouldPhotoBrowser;
 
 /**
- 每个item间距
+ 是否存在默认图片 - 可以理解为保存草稿
  */
-@property (nonatomic, assign) CGFloat padding;
-
+@property (nonatomic, assign) BOOL isDefualt;
 /**
  创建一个默认的样式
 

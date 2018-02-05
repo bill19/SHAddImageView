@@ -8,7 +8,7 @@
 
 #import "SHAddCollectionCell.h"
 #import "SHAddImgModel.h"
-#import "SHAddHeader.h"
+#import "SHConfigModel.h"
 @interface SHAddCollectionCell()
 
 /**
@@ -30,21 +30,18 @@
     self = [super initWithFrame:frame];
     if (self) {
         [self setupSubViews];
-        self.backgroundColor = [UIColor redColor];
     }
     return self;
 }
 
 - (void)setupSubViews {
     UIImageView *imageView = [[UIImageView alloc] init];
-    imageView.backgroundColor = [UIColor redColor];
     imageView.userInteractionEnabled = YES;
     [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewTap)]];
     _imageView = imageView;
     [self.contentView addSubview:imageView];
 
     UIButton *delBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [delBtn setImage:[UIImage imageNamed:@"circle_send_close2"] forState:UIControlStateNormal];
     [delBtn addTarget:self action:@selector(delImage:) forControlEvents:UIControlEventTouchUpInside];
     _deleteButton = delBtn;
     [imageView addSubview:_deleteButton];
@@ -66,17 +63,19 @@
 
 - (void)setImageModel:(SHAddImgModel *)imageModel {
     _imageModel = imageModel;
-    _imageView.backgroundColor = [UIColor purpleColor];
     _imageView.image = _imageModel.image;
 }
 
 - (void)setConfigModel:(SHConfigModel *)configModel {
     _configModel = configModel;
-
-    CGFloat padding = _configModel.padding * 0.5;
-    CGFloat imageItemHeight = (kSHScreenWidth - _configModel.padding) / _configModel.imageColumn;
-    _imageView.frame = CGRectMake(padding, padding, imageItemHeight - _configModel.padding, imageItemHeight - _configModel.padding);
-    _deleteButton.frame = CGRectMake(imageItemHeight - 20.f, padding, 20.f, 20.f);
+    [_deleteButton setImage:[UIImage imageNamed:_configModel.deletePlaceholdName] forState:UIControlStateNormal];
 }
 
+- (void)setImageHeight:(CGFloat)imageHeight {
+    _imageHeight = imageHeight;
+    CGFloat padding   = kItemPadding * 0.5;
+    CGFloat delImageH = 15.f;
+    _imageView.frame = CGRectMake(padding, padding, imageHeight, imageHeight);
+    _deleteButton.frame = CGRectMake(imageHeight - delImageH, 0, delImageH, delImageH);
+}
 @end

@@ -18,11 +18,12 @@
  */
 + (SHConfigModel *)creatNormalConfig  {
     SHConfigModel *config = [[SHConfigModel alloc] init];
-    config.maxPhoto = 9;
+    config.maxPhoto = 6;
     config.addBtnHidden = NO;
     config.placeholderName = @"circle_send_addImage";
-    config.imageColumn = 4;
-    config.padding = 10.0f;
+    config.deletePlaceholdName = @"circle_send_close2";
+    config.shouldPhotoBrowser = YES;
+    config.isDefualt = YES;
     return config;
 }
 

@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "SHConfigModel.h"
+#define kItemPadding 10
 @class SHAddImgModel;
 
 @protocol SHAddCollectionCellDelegate <NSObject>
@@ -30,11 +31,22 @@
 @interface SHAddCollectionCell : UICollectionViewCell
 
 /**
+ 代理方法
+ */
+@property (nonatomic, weak) id <SHAddCollectionCellDelegate> delegate;
+/**
  图片数据信息
  */
 @property (nonatomic, strong) SHAddImgModel *imageModel;
 
-@property (nonatomic, weak) id <SHAddCollectionCellDelegate> delegate;
 
+/**
+ 上个页面传递过来的confiModel
+ */
 @property (nonatomic, strong) SHConfigModel *configModel;
+/**
+ item的高度
+ */
+@property (nonatomic, assign) CGFloat imageHeight;
+
 @end
