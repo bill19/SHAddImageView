@@ -27,6 +27,10 @@
 @property (nonatomic, strong) NSMutableArray <SHAddImgModel *>*imageModels;
 
 /**
+ 图片数据源
+ */
+@property (nonatomic, strong) NSMutableArray <UIImage *>*images;
+/**
  通过configmodel 获取 每个ITEM的高度 （高度 = 宽度）
  */
 @property (nonatomic, assign) CGFloat itemHeight;
@@ -64,9 +68,12 @@
     [self addSubview:_addImgView];
 }
 
-- (void)addImgIBAction{
+- (void)addImgIBAction {
     [[[UIApplication sharedApplication] keyWindow] endEditing:YES];
     __weak typeof(self) weakSelf = self;
+    if (self.delegate && [self.delegate respondsToSelector:@selector(addImgIBActionImageSource:)]) {
+        [self.delegate addImgIBActionImageSource:self.images];
+    }
     if (self.imageModels.count >= _configModel.maxPhoto) {
         NSLog(@"=已经达到最大值==");
         return ;
@@ -99,8 +106,13 @@
         }
     }];
 
+    UIAlertAction *cancleButton = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        
+    }];
+
     [alertConVc addAction:fromcPhotograph];
     [alertConVc addAction:fromcAlbum];
+    [alertConVc addAction:cancleButton];
     [[self viewController] presentViewController:alertConVc animated:YES completion:nil];
 }
 
@@ -182,6 +194,7 @@
 #pragma mark - 删除内容
 - (void)delImageView:(SHAddImgModel *)model {
     [self.imageModels removeObject:model];
+    [self.images removeObject:model.image];
     [self.collectionView reloadData];
     [self resetAddImgFrame];
 }
@@ -218,6 +231,7 @@
             SHAddImgModel *model = [[SHAddImgModel alloc] init];
             model.image = image;
             [weakSelf.imageModels addObject:model];
+            [weakSelf.images addObject:image];
         }
         [self.collectionView reloadData];
         [self resetAddImgFrame];
@@ -314,6 +328,7 @@
         SHAddImgModel *model = [[SHAddImgModel alloc] init];
         model.image = resultImage;
         [weakSelf.imageModels addObject:model];
+        [weakSelf.images addObject:resultImage];
         [self.collectionView reloadData];
         [self resetAddImgFrame];
 

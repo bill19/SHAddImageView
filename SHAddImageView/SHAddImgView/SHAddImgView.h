@@ -29,6 +29,12 @@
 - (void)didSelectItemSource:(NSArray <UIImage *>*)itemSource index:(NSInteger)index ;
 
 
+/**
+ 点击 + 号按钮点击事件
+
+ @param imageSource 现在存在的图片数组
+ */
+- (void)addImgIBActionImageSource:(NSArray <UIImage *>*)imageSource ;
 @end
 
 @interface SHAddImgView : UIView
