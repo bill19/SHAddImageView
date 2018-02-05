@@ -1,0 +1,2 @@
+# SHAddImageView
+fix
