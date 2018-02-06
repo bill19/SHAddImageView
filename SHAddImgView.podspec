@@ -15,8 +15,8 @@ Pod::Spec.new do |s|
   #  summary should be tweet-length, and the description more in depth.
   #
 
-  s.name         = "SHAddImgView"
-  s.version      = "0.0.1"
+  s.name         = "SHAddImgageView"
+  s.version      = "1.0.1"
   s.summary      = "A short description of SHAddImgView."
 
   # This description is used to generate tags and improve search results.
@@ -79,7 +79,7 @@ Pod::Spec.new do |s|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  s.source       = { :git => "http://EXAMPLE/SHAddImgView.git", :tag => "#{s.version}" }
+  s.source       = { :git => "http://github.com/bill19/SHAddImgView.git", :tag => "#{s.version}" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
